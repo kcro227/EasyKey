@@ -1,5 +1,5 @@
-#include "key.h"
-#include "log.h"
+#include "inc/key.h"
+
 
 
 uint32_t get_gpio_value(uint32_t id)
@@ -44,8 +44,5 @@ void key_task(void *args)
 
     while (1) {
         KEY_Server();
-        // uint32_t state = KEY_GetStatusByID(0);
-        // if (state != KEY_STATE_RELEASED)
-        //     LOG_DEBUG("key_status: id-> 0 status -> %d", state);
     }
 }

@@ -1,5 +1,5 @@
-#include "fsm_core.h"
-#include "log.h"
+#include "./inc/fsm_core.h"
+
 
 uint8_t FSM_Scan_Count;
 uint32_t global_tick;
