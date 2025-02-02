@@ -1,0 +1,28 @@
+# Generate key
+menu "BSP Key Config"
+
+config LONG_PRESS_TIME
+    int "key long press time (tick)"
+    default 600
+
+config SHORT_TICKS
+    int "key short press time (tick)"
+    default 200
+
+config TICKS_INTERVAL
+    int 
+    default 10
+    prompt "按键扫描的时间间隔，单位：ms"
+
+config USE_FREERTOS
+    bool
+    default y
+    prompt "使用FreeRTOS实现按键扫描"
+
+config DOUBLE_CLICK_TIME
+    int
+    default 600
+    prompt "双击的阈值，在这个时间内连续按下按键则会触发双击"
+
+
+endmenu
