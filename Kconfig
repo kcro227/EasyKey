@@ -5,9 +5,10 @@ config LONG_PRESS_TIME
     int "key long press time (tick)"
     default 600
 
-config SHORT_TICKS
-    int "key short press time (tick)"
-    default 200
+config KEY_DEBUG
+    bool 
+    default y
+    prompt "按键的调试信息"
 
 config TICKS_INTERVAL
     int 
@@ -23,6 +24,17 @@ config DOUBLE_CLICK_TIME
     int
     default 600
     prompt "双击的阈值，在这个时间内连续按下按键则会触发双击"
+
+config FIFO_BUFFER_SIZE
+    int 
+    default 10
+    prompt "FIFO的队列长度"
+
+config FREE_RTOS_QUEUE
+    bool  
+    default n
+    depends on USE_FREERTOS
+    prompt "使用FreeRTOS的队列实现按键事件传输"
 
 
 endmenu

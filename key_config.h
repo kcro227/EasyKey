@@ -7,11 +7,17 @@
 // 双击的阈值，在这个时间内连续按下按键则会触发双击
 #define CONFIG_DOUBLE_CLICK_TIME 300
 
+// FIFO的队列长度
+#define CONFIG_FIFO_BUFFER_SIZE 10
+
+// 使用FreeRTOS的队列实现按键事件传输
+#define CONFIG_FREE_RTOS_QUEUE 0
+
+// 按键的调试信息
+#define CONFIG_KEY_DEBUG 0
+
 // key long press time (tick)
 #define CONFIG_LONG_PRESS_TIME 500
-
-// key short press time (tick)
-#define CONFIG_SHORT_TICKS 200
 
 // 按键扫描的时间间隔，单位：ms
 #define CONFIG_TICKS_INTERVAL 10
