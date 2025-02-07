@@ -2,8 +2,9 @@
 #define __FSM_CORE_H
 
 #include "key.h"
+#if CONFIG_KEY_DEBUG
 #include "log.h"
-
+#endif
 
 typedef enum {
     KEY_EVENT_STATE_IDLE,       // 空闲状态
