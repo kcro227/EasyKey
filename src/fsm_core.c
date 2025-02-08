@@ -1,7 +1,5 @@
 #include "fsm_core.h"
-#if CONFIG_USE_FIFO
 #include "fifo.h"
-#endif
 uint8_t g_sanTicks;
 uint32_t g_ticks;
 extern KEY_t *g_keyListHead;
@@ -93,7 +91,6 @@ void FSM_KeyEventScan(void)
                     point->data.press_time        = 0;     // 重置按压时间
                     point->data.isLongPressed     = false; // 重置长按标志
                     point->data.multi_click_count = 0;     // 重置多击计数
-                    
                 }
                 break;
             }
@@ -133,21 +130,15 @@ void FSM_KeyEventScan(void)
                     if (point->data.multi_click_count == 1) {
                         point->data.event.event       = KEY_EVENT_CLICK;
                         point->data.event.click_times = 1;
-#if CONFIG_USE_FIFO
                         FIFO_Push(&(point->event_fifo), KEY_EVENT_CLICK);
-#endif
                     } else if (point->data.multi_click_count == 2) {
                         point->data.event.event       = KEY_EVENT_DOUBLE_CLICK;
                         point->data.event.click_times = 2;
-#if CONFIG_USE_FIFO
                         FIFO_Push(&point->event_fifo, KEY_EVENT_DOUBLE_CLICK);
-#endif
                     } else {
                         point->data.event.event       = KEY_EVENT_MULTI_CLICK;
                         point->data.event.click_times = point->data.multi_click_count;
-#if CONFIG_USE_FIFO
                         FIFO_Push(&point->event_fifo, KEY_EVENT_MULTI_CLICK);
-#endif
                     }
                     point->status.event_state = KEY_EVENT_STATE_IDLE; // 返回空闲状态
                 }
@@ -173,9 +164,8 @@ void FSM_KeyEventScan(void)
                     point->data.event.event       = KEY_EVENT_LONG_PRESS;
                     point->data.event.click_times = 0;
                     point->data.isLongPressed     = true; // 设置长按标志
-#if CONFIG_USE_FIFO
+
                     FIFO_Push(&point->event_fifo, KEY_EVENT_LONG_PRESS);
-#endif
                 }
 
                 if (point->status.state == KEY_STATE_RELEASED) {
@@ -187,9 +177,8 @@ void FSM_KeyEventScan(void)
                     point->data.event.click_times = 0;
                     point->status.event_state     = KEY_EVENT_STATE_IDLE; // 返回空闲状态
                     point->data.isLongPressed     = false;                // 重置长按标志
-#if CONFIG_USE_FIFO
+
                     FIFO_Push(&point->event_fifo, KEY_EVENT_LONG_PRESS_RELEASE);
-#endif
                 }
                 break;
             }
@@ -206,10 +195,17 @@ void FSM_KeyEventScan(void)
  */
 void KEY_Server(void)
 {
+
+#if CONFIG_USE_FREERTOS
+    FSM_KeyStateScan();
+    FSM_KeyEventScan();
+    vTaskDelay(pdMS_TO_TICKS(CONFIG_TICKS_INTERVAL));
+#else
     if (g_sanTicks >= CONFIG_TICKS_INTERVAL) {
         // 达到消抖间隔，开始扫描按键状态
         g_sanTicks = 0;
         FSM_KeyStateScan();
         FSM_KeyEventScan();
     }
+#endif
 }

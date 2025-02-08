@@ -2,9 +2,8 @@
 #define __FSM_CORE_H
 
 #include "key.h"
-#if CONFIG_KEY_DEBUG
 #include "log.h"
-#endif
+#include "semphr.h"
 
 typedef enum {
     KEY_EVENT_STATE_IDLE,       // 空闲状态
@@ -49,14 +48,17 @@ typedef struct {
     uint8_t head;  // 队列头指针
     uint8_t tail;  // 队列尾指针
     uint8_t count; // 队列中当前事件的数量
+
+#if CONFIG_USE_FREERTOS
+    SemaphoreHandle_t xMutex;
+#endif
+
 } FIFO_Buffer_t;
 
 typedef struct KEY_t {
-    KEY_Status_t status; // 按键状态
-    KEY_Data_t data;     // 按键数据
-#if CONFIG_USE_FIFO
+    KEY_Status_t status;      // 按键状态
+    KEY_Data_t data;          // 按键数据
     FIFO_Buffer_t event_fifo; // FIFO 事件队列
-#endif
     uint32_t (*get_key_value)(uint32_t key_num);
     struct KEY_t *next; // 指向下一个按键节点的指针
 

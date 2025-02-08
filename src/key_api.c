@@ -1,8 +1,7 @@
 #include "fsm_core.h"
 #include "string.h"
-#if CONFIG_USE_FIFO
 #include "fifo.h"
-#endif
+
 KEY_t *g_keyListHead = NULL;
 
 /**
@@ -17,10 +16,11 @@ void KEY_Member_Register(uint8_t id, KEY_LEVEL key_press_level, char *name, uint
         LOG_ERROR("malloc faild!");
         return;
     }
-
+    
     // 初始化新节点的数据
     memset(newNode, 0, sizeof(KEY_t));
-
+    
+    FIFO_Init(&newNode->event_fifo);
     newNode->status.press_level = key_press_level;
     newNode->status.state       = KEY_STATE_RELEASED;
     newNode->status.cnt         = 0;
@@ -97,27 +97,12 @@ bool KEY_GetEventByID(uint8_t id, KEY_EventData_t *pointEven)
     }
     // 如果找到节点
     if (current != NULL) {
-#if CONFIG_USE_FIFO
         if (FIFO_Pop(&current->event_fifo, &pointEven->event))
             return 0;
         else {
             pointEven->event = KEY_EVENT_NONE;
             return 2;
         }
-#else
-        if (current->data.event.event != KEY_EVENT_NONE) {
-            pointEven->event       = current->data.event.event;
-            pointEven->click_times = current->data.event.click_times;
-            // current->data.event.click_times = 0;
-            // current->data.event.event       = KEY_EVENT_NONE;
-            return 0;
-        } else {
-            pointEven->event       = KEY_EVENT_NONE;
-            pointEven->click_times = 0;
-            return 2;
-        }
-
-#endif
     } else
         return 1;
 }
