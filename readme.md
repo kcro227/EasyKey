@@ -243,7 +243,7 @@ if (!ret) {
 以下是一个完整的示例代码，展示了如何使用 Easy Key 库：
 
 ```c
-#include "key.h"
+#include "Easykey.h"
 
 uint32_t get_gpio_value(uint32_t id)
 {
