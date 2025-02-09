@@ -1,4 +1,4 @@
-#include "fsm_core.h"
+#include "Easykey.h"
 #include "fifo.h"
 uint8_t g_sanTicks;
 uint32_t g_ticks;
@@ -13,17 +13,6 @@ void FSM_Ticks(uint8_t ticks)
     g_sanTicks += ticks;
     g_ticks += ticks; // 更新全局时间戳
 }
-
-#if CONFIG_USE_FREERTOS
-/***
- * @brief FreeRTOS下的软件定时器回调函数
- */
-void KEY_TimerCall(void)
-{
-    FSM_Ticks(10);
-}
-#endif
-
 /***
  * @brief 按键的状态扫描
  */
@@ -84,7 +73,7 @@ void FSM_KeyEventScan(void)
         switch (point->status.event_state) {
             case KEY_EVENT_STATE_IDLE: {
                 // 空闲状态，等待按键按下
-                point->data.event.event = KEY_EVENT_NONE;
+                point->data.event = KEY_EVENT_NONE;
                 if (point->status.state == KEY_STATE_PRESSED) {
                     // 按键按下，进入按下状态
                     point->status.event_state     = KEY_EVENT_STATE_PRESSED;
@@ -111,7 +100,6 @@ void FSM_KeyEventScan(void)
                     point->status.event_state     = KEY_EVENT_STATE_WAIT_MULTI;
                     point->data.wait_double_time  = 0; // 重置等待双击时间
                     point->data.multi_click_count = 1; // 设置多击计数为1
-                    // LOG_DEBUG("Key %d: Released, goto wait double state", point->data.id);
                 }
                 break;
             }
@@ -128,16 +116,14 @@ void FSM_KeyEventScan(void)
                     LOG_DEBUG("Key %d: Multi-click event triggered (count: %d)", point->data.id, point->data.multi_click_count);
 #endif
                     if (point->data.multi_click_count == 1) {
-                        point->data.event.event       = KEY_EVENT_CLICK;
-                        point->data.event.click_times = 1;
+                        point->data.event = KEY_EVENT_CLICK;
                         FIFO_Push(&(point->event_fifo), KEY_EVENT_CLICK);
                     } else if (point->data.multi_click_count == 2) {
-                        point->data.event.event       = KEY_EVENT_DOUBLE_CLICK;
-                        point->data.event.click_times = 2;
+                        point->data.event = KEY_EVENT_DOUBLE_CLICK;
                         FIFO_Push(&point->event_fifo, KEY_EVENT_DOUBLE_CLICK);
                     } else {
-                        point->data.event.event       = KEY_EVENT_MULTI_CLICK;
-                        point->data.event.click_times = point->data.multi_click_count;
+                        point->data.event = KEY_EVENT_MULTI_CLICK;
+
                         FIFO_Push(&point->event_fifo, KEY_EVENT_MULTI_CLICK);
                     }
                     point->status.event_state = KEY_EVENT_STATE_IDLE; // 返回空闲状态
@@ -161,8 +147,8 @@ void FSM_KeyEventScan(void)
 #if CONFIG_KEY_DEBUG
                     LOG_DEBUG("Key %d: Long press event triggered", point->data.id);
 #endif
-                    point->data.event.event       = KEY_EVENT_LONG_PRESS;
-                    point->data.event.click_times = 0;
+                    point->data.event       = KEY_EVENT_LONG_PRESS;
+
                     point->data.isLongPressed     = true; // 设置长按标志
 
                     FIFO_Push(&point->event_fifo, KEY_EVENT_LONG_PRESS);
@@ -173,8 +159,7 @@ void FSM_KeyEventScan(void)
 #if CONFIG_KEY_DEBUG
                     LOG_DEBUG("Key %d: Long press release event triggered", point->data.id);
 #endif
-                    point->data.event.event       = KEY_EVENT_LONG_PRESS_RELEASE;
-                    point->data.event.click_times = 0;
+                    point->data.event       = KEY_EVENT_LONG_PRESS_RELEASE;
                     point->status.event_state     = KEY_EVENT_STATE_IDLE; // 返回空闲状态
                     point->data.isLongPressed     = false;                // 重置长按标志
 
@@ -195,7 +180,6 @@ void FSM_KeyEventScan(void)
  */
 void KEY_Server(void)
 {
-
 #if CONFIG_USE_FREERTOS
     FSM_KeyStateScan();
     FSM_KeyEventScan();

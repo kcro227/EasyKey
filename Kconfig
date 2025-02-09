@@ -1,4 +1,4 @@
-# Generate key
+# Generate Easykey
 menu "BSP Key Config"
 
 config LONG_PRESS_TIME
@@ -36,5 +36,8 @@ config FREE_RTOS_QUEUE
     depends on USE_FREERTOS
     prompt "使用FreeRTOS的队列实现按键事件传输"
 
-
+config DYNAMIC_ALLOCATION
+    bool
+    default n
+    prompt "使用动态内存申请，如果不使用FreeRTOS的API，请在Easykey.h中的宏替换自己的API"
 endmenu
